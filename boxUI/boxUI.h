@@ -127,7 +127,7 @@ typedef struct BX_Box
 	
 	BX_Theme theme;
 
-	u8 type;
+	u16 type;
 
 	u16 numChild;
 	struct BX_Box* par;
