@@ -1,7 +1,7 @@
 #pragma once
 #include "boxUI.h"
 
-BX_Rectf bx_alignBox(BX_Rectf box, u8 posMode, BX_Rectf parent);
+BX_Rectf bx_alignBox(BX_Rectf box, u16 posMode, BX_Rectf parent);
 
 void bx_initBox(BX_Box* box, BX_Box* parent, BX_Rectf rect, BX_Theme theme);
 

@@ -9,34 +9,34 @@ BX_Box bx_createRoot(BX_Rectf rect)
 	return box;
 }
 
-BX_Rectf bx_alignBox(BX_Rectf box, u8 posMode, BX_Rectf parent)
+BX_Rectf bx_alignBox(BX_Rectf box, u16 posMode, BX_Rectf parent)
 {
 	BX_Rectf rect = box;
 
 	// X
-	if (posMode & BX_PER_W)
+	if (posMode & BX_RECT_PER_W)
 		rect.w = parent.w * (box.w * 0.01f);
 
-	if (posMode & BX_PER_X)
+	if (posMode & BX_RECT_PER_X)
 		rect.x = parent.x + parent.w * (box.x * 0.01f);
 
-	if (posMode & BX_ALIGN_L);
-	else if (posMode & BX_ALIGN_R)
+	if (posMode & BX_RECT_ALIGN_L);
+	else if (posMode & BX_RECT_ALIGN_R)
 		rect.x -= rect.w;
-	else // BX_ALIGN_C
+	else // BX_RECT_ALIGN_C
 		rect.x -= rect.w * 0.5f;
 
 	// Y
-	if (posMode & BX_PER_H)
+	if (posMode & BX_RECT_PER_H)
 		rect.h = parent.h * (box.h * 0.01f);
 
-	if (posMode & BX_PER_Y)
+	if (posMode & BX_RECT_PER_Y)
 		rect.y = parent.y + parent.h * (box.y * 0.01f);
 
-	if (posMode & BX_ALIGN_T);
-	else if (posMode & BX_ALIGN_B)
+	if (posMode & BX_RECT_ALIGN_T);
+	else if (posMode & BX_RECT_ALIGN_B)
 		rect.y -= rect.h;
-	else // BX_ALIGN_C
+	else // BX_RECT_ALIGN_C
 		rect.y -= rect.h * 0.5f;
 
 	return rect;
@@ -170,7 +170,7 @@ void bx_drawBoxOutline(BX_Box* box, BX_Image image, BX_Rectf parent, BX_Rectf bo
 	BX_Box temp;
 	BX_Theme theme = { 0 };
 	theme.bgColor = box->theme.outColor;
-	theme.posMode = BX_ALIGN_L | BX_ALIGN_T;
+	theme.posMode = BX_RECT_ALIGN_L | BX_RECT_ALIGN_T;
 	BX_Rectf rect = { 0 };
 	bx_initBox(&temp, box, rect, theme);
 	temp.type = BX_TYPE_BOX;
