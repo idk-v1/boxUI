@@ -20,10 +20,13 @@ int main()
 	theme.fgColor = bx_rgba(0xFF, 0xFF, 0xFF, 0xFF);
 	theme.bgColor = bx_rgba(0xFF, 0x00, 0x00, 0xFF);
 	theme.outColor = bx_rgba(0xFF, 0xFF, 0xFF, 0xFF);
-	theme.posMode = BX_RECT_PER_X | BX_RECT_PER_Y | BX_RECT_PER_W | BX_RECT_PER_H |
+	theme.posMode = BX_RECT_ALIGN_CX | BX_RECT_ALIGN_CY |
+		BX_RECT_PER_X | BX_RECT_PER_Y | BX_RECT_PER_W | BX_RECT_PER_H |
 		BX_MARG_PER_X | BX_MARG_PER_Y | BX_MARG_PER_W | BX_MARG_PER_H;
 
-	BX_Box* first = bx_createBox(&root, bx_Rectf(50.f, 50.f, 50.f, 50.f), theme);
+	theme.aspect = 1.f;
+	BX_Box* first = bx_createBox(&root, bx_Rectf(50.f, 50.f, 75.f, 75.f), theme);
+	theme.aspect = 0.f;
 	theme.outThick = 1;
 	for (int i = 0; i < 4; i++)
 	{
