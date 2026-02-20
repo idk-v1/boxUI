@@ -72,6 +72,22 @@ inline BX_RGBA bx_rgba(u8 r, u8 g, u8 b, u8 a)
 	return rgba;
 }
 
+inline BX_RGBA bx_rgbaHex(u32 color)
+{
+	BX_RGBA ret;
+	ret.hex = color;
+	return ret;
+}
+
+inline float bx_clamp(float min, float val, float max)
+{
+	if (val < min)
+		return min;
+	if (val > max)
+		return max;
+	return val;
+}
+
 inline float bx_lerp(float a, float b, float v)
 {
 	return (a * v + b * (1.f - v));
@@ -85,6 +101,17 @@ inline BX_RGBA bx_colorLerp(BX_RGBA a, BX_RGBA b, float v)
 	ret.b = bx_lerp(a.b, b.b, v);
 	ret.a = bx_lerp(a.a, b.a, v);
 	return ret;
+}
+
+inline BX_RGBA bx_blendAlpha(BX_RGBA color, BX_RGBA old)
+{
+	float alpha = color.a / 255.f;
+	BX_RGBA out;
+	out.a = 255;
+	out.r = alpha * color.r + (1.f - alpha) * old.r;
+	out.g = alpha * color.g + (1.f - alpha) * old.g;
+	out.b = alpha * color.b + (1.f - alpha) * old.b;
+	return out;
 }
 
 

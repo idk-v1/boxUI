@@ -123,21 +123,13 @@ void drawRect(BX_Image image, BX_Rectu rect, BX_Theme theme)
 	}
 	else // Slow blend
 	{
-		BX_RGBA color;
-		color.a = 255;
-		float alpha = theme.bgColor.a / 255.f;
-
 		for (u64 x = 0; x < rect.w; ++x)
 			for (u64 y = 0; y < rect.h; ++y)
 			{
-				BX_RGBA oldColor;
-				oldColor.hex = image.pixels[(x + rect.x) + (y + rect.y) * image.size.x];
-
-				color.r = alpha * theme.bgColor.r + (1.f - alpha) * oldColor.r;
-				color.g = alpha * theme.bgColor.g + (1.f - alpha) * oldColor.g;
-				color.b = alpha * theme.bgColor.b + (1.f - alpha) * oldColor.b;
-				
-				image.pixels[(x + rect.x) + (y + rect.y) * image.size.x] = color.hex;
+				image.pixels[(x + rect.x) + (y + rect.y) * image.size.x] = 
+					bx_blendAlpha(theme.bgColor, 
+						bx_rgbaHex(image.pixels[(x + rect.x) + (y + rect.y) * image.size.x])
+					).hex;
 			}
 	}
 }
