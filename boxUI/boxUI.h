@@ -54,7 +54,11 @@ typedef struct BX_RGBA
 	{
 		u32 hex;
 		// Change order depending on system
+#if 0 // using stb_image
 		struct { u8 r, g, b, a; };
+#elif defined _WIN32
+		struct { u8 b, g, r, a; };
+#endif
 	};
 } BX_RGBA;
 
@@ -118,7 +122,8 @@ typedef struct BX_Box
 	
 	BX_Theme theme;
 
-	u16 type;
+	u8 type;
+	bool hovered;
 
 	u16 numChild;
 	struct BX_Box* par;
@@ -137,7 +142,7 @@ BX_Box bx_createRoot(BX_Rectf rect);
 
 BX_Box* bx_createBox(BX_Box* parent, BX_Rectf rect, BX_Theme theme);
 
-void bx_updateBox(BX_Box* box, BX_Rectf rect);
+void bx_updateBox(BX_Box* root, BX_Vec2f mouse);
 
 void bx_drawBox(BX_Box* root, BX_Image image);
 

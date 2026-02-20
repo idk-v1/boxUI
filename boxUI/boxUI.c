@@ -111,11 +111,6 @@ BX_Box* bx_createBox(BX_Box* parent, BX_Rectf rect, BX_Theme theme)
 	return box;
 }
 
-void bx_updateBox(BX_Box* box, BX_Rectf rect)
-{
-	box->rect = rect;
-}
-
 
 void drawRect(BX_Image image, BX_Rectu rect, BX_Theme theme)
 {
@@ -147,12 +142,10 @@ void drawRect(BX_Image image, BX_Rectu rect, BX_Theme theme)
 	}
 }
 
-
-void bx_drawBoxRec(BX_Box* box, BX_Image image, BX_Rectf parent)
+BX_Rectf bx_cropRect(BX_Rectf rect, BX_Rectf parent)
 {
-	BX_Rectf margin = bx_alignBoxMargin(box->rect, box->theme.margin, box->theme.posMode, parent);
+	BX_Rectf crop = rect;
 
-	BX_Rectf crop = margin;
 	// Flip rect if negative size
 	if (crop.w < 0)
 	{
@@ -190,7 +183,26 @@ void bx_drawBoxRec(BX_Box* box, BX_Image image, BX_Rectf parent)
 	if (crop.y - parent.y + crop.h >= parent.h)
 		crop.h += parent.h - (crop.y - parent.y + crop.h);
 
-	drawRect(image, bx_Rectu(roundf(crop.x), roundf(crop.y), roundf(crop.w), roundf(crop.h)), box->theme);
+	return crop;
+}
+
+
+void bx_drawBoxRec(BX_Box* box, BX_Image image, BX_Rectf parent)
+{
+	BX_Rectf margin = bx_alignBoxMargin(box->rect, box->theme.margin, 
+		box->theme.posMode, parent);
+
+	BX_Rectf crop = bx_cropRect(margin, parent);
+
+	drawRect(image, bx_Rectu(roundf(crop.x), roundf(crop.y),
+		roundf(crop.w), roundf(crop.h)), box->theme);
+	if (box->hovered)
+	{
+		BX_Theme theme = box->theme;
+		theme.bgColor = bx_rgba(0xFF, 0xFF, 0xFF, 0x3F);
+		drawRect(image, bx_Rectu(roundf(crop.x), roundf(crop.y),
+			roundf(crop.w), roundf(crop.h)), theme);
+	}
 
 	if (box->theme.outThick)
 		bx_drawBoxOutline(box, image, parent, margin);
@@ -276,6 +288,54 @@ void bx_drawBoxOutline(BX_Box* box, BX_Image image, BX_Rectf parent, BX_Rectf bo
 		rect.h = box->theme.outThick;
 		temp.rect = rect;
 		bx_drawBoxRec(&temp, image, parent);
+	}
+}
+
+bool bx_updateBoxRec(BX_Box* box, BX_Rectf parent, BX_Vec2f mouse, bool hasChance)
+{
+	if (hasChance)
+	{
+		BX_Rectf margin = bx_alignBoxMargin(box->rect, box->theme.margin,
+			box->theme.posMode, parent);
+
+		BX_Rectf crop = bx_cropRect(margin, parent);
+
+		bool hovered = bx_rectContains(crop, mouse);
+
+		bool foundBetter = false;
+		for (u64 i = 0; i < box->numChild; ++i)
+			if (bx_updateBoxRec(box->child[i], margin, mouse, hovered))
+				foundBetter = true;
+
+		box->hovered = false;
+		if (!foundBetter)
+			box->hovered = hovered;
+
+		return hovered;
+	}
+	else
+	{
+		box->hovered = false;
+
+		for (u64 i = 0; i < box->numChild; ++i)
+			bx_updateBoxRec(box->child[i], parent, mouse, box->hovered);
+		
+		return false;
+	}
+}
+
+bool bx_rectContains(BX_Rectf rect, BX_Vec2f point)
+{
+	return (point.x >= rect.x && point.y >= rect.y &&
+		point.x < rect.x + rect.w && point.y < rect.y + rect.h);
+}
+
+void bx_updateBox(BX_Box* root, BX_Vec2f mouse)
+{
+	// Size needs to be in pixels, just use root
+	if (root->type == BX_TYPE_ROOT)
+	{
+		bx_updateBoxRec(root, root->rect, mouse, true);
 	}
 }
 
