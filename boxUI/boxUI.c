@@ -5,6 +5,7 @@ BX_Box bx_createRoot(BX_Rectf rect)
 {
 	BX_Box box = { 0 };
 	box.rect = rect;
+	box.theme.posMode = BX_RECT_ALIGN_L | BX_RECT_ALIGN_T;
 	box.type = BX_TYPE_ROOT;
 	return box;
 }
@@ -42,6 +43,39 @@ BX_Rectf bx_alignBox(BX_Rectf box, u16 posMode, BX_Rectf parent)
 	return rect;
 }
 
+BX_Rectf bx_alignBoxMargin(BX_Rectf box, BX_Rectf margin, u16 posMode, BX_Rectf parent)
+{
+	BX_Rectf rect = bx_alignBox(box, posMode, parent);
+	// Margin uses width and height as right and bottom
+	// Convert from position to size
+
+	BX_Rectf ret;
+
+	// X
+	if (posMode & BX_MARG_PER_X)
+		ret.x = rect.x + rect.w * (margin.x * 0.01f);
+	else
+		ret.x = rect.x + margin.x;
+
+	if (posMode & BX_MARG_PER_W)
+		ret.w = rect.w * (1.f - margin.w * 0.01f) - (ret.x - rect.x);
+	else
+		ret.w = rect.w - margin.w - (ret.x - rect.x);
+
+	// Y
+	if (posMode & BX_MARG_PER_Y)
+		ret.y = rect.y + rect.h * (margin.y * 0.01f);
+	else
+		ret.y = rect.y + margin.y;
+
+	if (posMode & BX_MARG_PER_H)
+		ret.h = rect.h * (1.f - margin.h * 0.01f) - (ret.y - rect.y);
+	else
+		ret.h = rect.h - margin.h - (ret.y - rect.y);
+
+	return ret;
+}
+
 void bx_initBox(BX_Box* box, BX_Box* parent, BX_Rectf rect, BX_Theme theme)
 {
 	memset(box, 0, sizeof(BX_Box));
@@ -75,6 +109,11 @@ BX_Box* bx_createBox(BX_Box* parent, BX_Rectf rect, BX_Theme theme)
 		}
 	}
 	return box;
+}
+
+void bx_updateBox(BX_Box* box, BX_Rectf rect)
+{
+	box->rect = rect;
 }
 
 
@@ -111,14 +150,9 @@ void drawRect(BX_Image image, BX_Rectu rect, BX_Theme theme)
 
 void bx_drawBoxRec(BX_Box* box, BX_Image image, BX_Rectf parent)
 {
-	BX_Rectf bounds;
+	BX_Rectf margin = bx_alignBoxMargin(box->rect, box->theme.margin, box->theme.posMode, parent);
 
-	if (box->type != BX_TYPE_ROOT)
-		bounds = bx_alignBox(box->rect, box->theme.posMode, parent);
-	else // Root is forced to be top left origin, using pixels, so no transformations
-		bounds = box->rect;
-
-	BX_Rectf crop = bounds;
+	BX_Rectf crop = margin;
 	// Flip rect if negative size
 	if (crop.w < 0)
 	{
@@ -159,20 +193,20 @@ void bx_drawBoxRec(BX_Box* box, BX_Image image, BX_Rectf parent)
 	drawRect(image, bx_Rectu(roundf(crop.x), roundf(crop.y), roundf(crop.w), roundf(crop.h)), box->theme);
 
 	if (box->theme.outThick)
-		bx_drawBoxOutline(box, image, parent, bounds);
+		bx_drawBoxOutline(box, image, parent, margin);
 
 	for (u64 i = 0; i < box->numChild; ++i)
-		bx_drawBoxRec(box->child[i], image, bounds);
+		bx_drawBoxRec(box->child[i], image, margin);
 }
 
 void bx_drawBoxOutline(BX_Box* box, BX_Image image, BX_Rectf parent, BX_Rectf bounds)
 {
-	BX_Box temp;
+	BX_Box temp = { 0 };
 	BX_Theme theme = { 0 };
 	theme.bgColor = box->theme.outColor;
 	theme.posMode = BX_RECT_ALIGN_L | BX_RECT_ALIGN_T;
 	BX_Rectf rect = { 0 };
-	bx_initBox(&temp, box, rect, theme);
+	bx_initBox(&temp, NULL, rect, theme);
 	temp.type = BX_TYPE_BOX;
 
 	if (box->theme.outThick < 0)
@@ -245,11 +279,20 @@ void bx_drawBoxOutline(BX_Box* box, BX_Image image, BX_Rectf parent, BX_Rectf bo
 	}
 }
 
-void bx_drawBox(BX_Box* box, BX_Image image)
+void bx_drawBox(BX_Box* root, BX_Image image)
 {
+	/* 
+	 * Just an idea for later, compile the UI; make all this theme and UI data, turn it into individual simplified rects 
+	   with only positions, no relative positions, mar gins, etc... only references to parents and children as well as 
+	   to internal types. for every unique rect, save a class somewhere and then it will be referenced. textis stored 
+	   per rect, not inthe class, that alowsmany very similar things to be abstracted as the same class, i.e. rects 
+	   withthe same width, height, margins, and colors ifapplicablr
+	   Fuck your god damn keybaord snd touchpad
+	 */
+
 	// Do nothing if not root, I don't wanna recurse all the way up to calc root bounds
-	if (box->type == BX_TYPE_ROOT)
-		bx_drawBoxRec(box, image, box->rect);
+	if (root->type == BX_TYPE_ROOT)
+		bx_drawBoxRec(root, image, root->rect);
 }
 
 void bx_deleteBox(BX_Box* box)

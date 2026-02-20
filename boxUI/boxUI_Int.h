@@ -3,6 +3,8 @@
 
 BX_Rectf bx_alignBox(BX_Rectf box, u16 posMode, BX_Rectf parent);
 
+BX_Rectf bx_alignBoxMargin(BX_Rectf box, BX_Rectf margin, u16 posMode, BX_Rectf parent);
+
 void bx_initBox(BX_Box* box, BX_Box* parent, BX_Rectf rect, BX_Theme theme);
 
 void drawRect(BX_Image image, BX_Rectu rect, BX_Theme theme);

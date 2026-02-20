@@ -79,14 +79,10 @@ typedef struct BX_Theme
 	BX_Rectf margin;
 	BX_RGBA fgColor, bgColor, outColor;
 	i32 outThick; // positive draws inside, negative draws outside, 0 disables
-	// bits [0-7] are for rect alignment
-	// bits [8-F] are for margin alignment
-	// bits [0-3] x0 y1 w2 h3 |  0 - use pixels, 1 - use percent
-	// bits [4,5] x45         | 00 - centered,  10 - left, 01 right
-	// bits [6,7] y67         | 00 - centered,  10 - top,  01 bottom
-	// bits [8-B] x0 y1 w2 h3 |  0 - use pixels, 1 - use percent
-	// bits [C,D] x45         | 00 - centered,  10 - left, 01 right
-	// bits [E,F] y67         | 00 - centered,  10 - top,  01 bottom
+	// bits [0-3] x0 y1 w2 h3 |  0 - use pixels, 1 - use percent     | Rect
+	// bits [4,5] x45         | 00 - centered,  10 - left, 01 right  | Rect
+	// bits [6,7] y67         | 00 - centered,  10 - top,  01 bottom | Rect
+	// bits [8-B] x0 y1 w2 h3 |  0 - use pixels, 1 - use percent     | Margin
 	u16 posMode;
 } BX_Theme;
 
@@ -106,11 +102,6 @@ enum
 	BX_RECT_PER_W   =              0b100,
 	BX_RECT_PER_H   =             0b1000,
 
-	BX_MARG_ALIGN_C =                0b0,
-	BX_MARG_ALIGN_L =   0b10000000000000,
-	BX_MARG_ALIGN_R =    0b1000000000000,
-	BX_MARG_ALIGN_T = 0b1000000000000000,
-	BX_MARG_ALIGN_B =  0b100000000000000,
 	BX_MARG_PIX_X   =                0b0,
 	BX_MARG_PIX_Y   =                0b0,
 	BX_MARG_PIX_W   =                0b0,
@@ -146,6 +137,8 @@ BX_Box bx_createRoot(BX_Rectf rect);
 
 BX_Box* bx_createBox(BX_Box* parent, BX_Rectf rect, BX_Theme theme);
 
-void bx_drawBox(BX_Box* box, BX_Image image);
+void bx_updateBox(BX_Box* box, BX_Rectf rect);
+
+void bx_drawBox(BX_Box* root, BX_Image image);
 
 void bx_deleteBox(BX_Box* box);
