@@ -27,13 +27,13 @@ int main()
 	theme.outThick = 1;
 	for (int i = 0; i < 4; i++)
 	{
-		theme.bgColor = bx_rgba(0x00, 0xFF, 0x00, 255.f / 3.f * i);
+		theme.bgColor = bx_colorLerp(bx_rgba(0x00, 0xFF, 0x00, 0xFF), bx_rgba(0xFF, 0x00, 0x00, 0xFF), i / 3.f);
 		bx_createBox(first, bx_Rectf(i * 20.f + 20.f, 33.f, 20.f, 20.f), theme);
 	}
 	theme.margin = bx_Rectf(10.f, 10.f, 10.f, 10.f);
 	for (int i = 0; i < 4; i++)
 	{
-		theme.bgColor = bx_rgba(0x00, 0xFF, 0x00, 255.f / 3.f * i);
+		theme.bgColor = bx_colorLerp(bx_rgba(0x00, 0xFF, 0x00, 0xFF), bx_rgba(0xFF, 0x00, 0x00, 0xFF), i / 3.f);
 		bx_createBox(first, bx_Rectf(i * 20.f + 20.f, 66.f, 20.f, 20.f), theme);
 	}
 

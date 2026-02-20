@@ -72,6 +72,22 @@ inline BX_RGBA bx_rgba(u8 r, u8 g, u8 b, u8 a)
 	return rgba;
 }
 
+inline float bx_lerp(float a, float b, float v)
+{
+	return (a * v + b * (1.f - v));
+}
+
+inline BX_RGBA bx_colorLerp(BX_RGBA a, BX_RGBA b, float v)
+{
+	BX_RGBA ret;
+	ret.r = bx_lerp(a.r, b.r, v);
+	ret.g = bx_lerp(a.g, b.g, v);
+	ret.b = bx_lerp(a.b, b.b, v);
+	ret.a = bx_lerp(a.a, b.a, v);
+	return ret;
+}
+
+
 enum
 {
 	BX_TYPE_ROOT,

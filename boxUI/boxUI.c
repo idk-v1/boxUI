@@ -341,15 +341,6 @@ void bx_updateBox(BX_Box* root, BX_Vec2f mouse)
 
 void bx_drawBox(BX_Box* root, BX_Image image)
 {
-	/* 
-	 * Just an idea for later, compile the UI; make all this theme and UI data, turn it into individual simplified rects 
-	   with only positions, no relative positions, mar gins, etc... only references to parents and children as well as 
-	   to internal types. for every unique rect, save a class somewhere and then it will be referenced. textis stored 
-	   per rect, not inthe class, that alowsmany very similar things to be abstracted as the same class, i.e. rects 
-	   withthe same width, height, margins, and colors ifapplicablr
-	   Fuck your god damn keybaord snd touchpad
-	 */
-
 	// Do nothing if not root, I don't wanna recurse all the way up to calc root bounds
 	if (root->type == BX_TYPE_ROOT)
 		bx_drawBoxRec(root, image, root->rect);
@@ -359,8 +350,23 @@ void bx_deleteBox(BX_Box* box)
 {
 	if (box)
 	{
+		if (box->par)
+		{
+			for (u64 i = 0; i < box->par->numChild; ++i)
+			{
+				if (box->par->child[i] == box)
+				{
+					box->par->child[i] = box->par->child[box->par->numChild - 1];
+					--box->par->numChild;
+					break;
+				}
+			}
+		}
+
 		for (u64 i = 0; i < box->numChild; ++i)
 			bx_deleteBox(box->child[i]);
+		if (box->child)
+			free(box->child);
 		if (box->type == BX_TYPE_ROOT)
 			memset(box, 0, sizeof(BX_Box));
 		else
