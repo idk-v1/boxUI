@@ -40,37 +40,65 @@ BX_Rectf bx_alignBox(BX_Rectf box, u16 posMode, BX_Rectf parent)
 	return rect;
 }
 
-BX_Rectf bx_alignBoxMargin(BX_Rectf box, BX_Rectf margin, u16 posMode, BX_Rectf parent)
+BX_Rectf bx_alignBoxMargin(BX_Rectf box, BX_Theme theme, BX_Rectf parent)
 {
-	BX_Rectf rect = bx_alignBox(box, posMode, parent);
+	BX_Rectf rect = bx_alignBox(box, theme.posMode, parent);
 	// Margin uses width and height as right and bottom
 	// Convert from position to size
 
 	BX_Rectf ret;
 
 	// X
-	if (posMode & BX_MARG_PER_X)
-		ret.x = rect.x + rect.w * (margin.x * 0.01f);
+	if (theme.posMode & BX_MARG_PER_L)
+		ret.x = rect.x + rect.w * (theme.margin.x * 0.01f);
 	else
-		ret.x = rect.x + margin.x;
+		ret.x = rect.x + theme.margin.x;
 
-	if (posMode & BX_MARG_PER_W)
-		ret.w = rect.w * (1.f - margin.w * 0.01f) - (ret.x - rect.x);
+	if (theme.posMode & BX_MARG_PER_R)
+		ret.w = rect.w * (1.f - theme.margin.w * 0.01f) - (ret.x - rect.x);
 	else
-		ret.w = rect.w - margin.w - (ret.x - rect.x);
+		ret.w = rect.w - theme.margin.w - (ret.x - rect.x);
 
 	// Y
-	if (posMode & BX_MARG_PER_Y)
-		ret.y = rect.y + rect.h * (margin.y * 0.01f);
+	if (theme.posMode & BX_MARG_PER_T)
+		ret.y = rect.y + rect.h * (theme.margin.y * 0.01f);
 	else
-		ret.y = rect.y + margin.y;
+		ret.y = rect.y + theme.margin.y;
 
-	if (posMode & BX_MARG_PER_H)
-		ret.h = rect.h * (1.f - margin.h * 0.01f) - (ret.y - rect.y);
+	if (theme.posMode & BX_MARG_PER_B)
+		ret.h = rect.h * (1.f - theme.margin.h * 0.01f) - (ret.y - rect.y);
 	else
-		ret.h = rect.h - margin.h - (ret.y - rect.y);
+		ret.h = rect.h - theme.margin.h - (ret.y - rect.y);
 
 	return ret;
+}
+
+BX_Rectf bx_applyAspectRatio(BX_Rectf box, BX_Theme theme)
+{
+	if (theme.aspect != 0.f)
+	{
+		float aspect = (float)box.w / (float)box.h;
+		if (aspect < theme.aspect)
+		{
+			float newH = box.h * (aspect / theme.aspect);
+			if (theme.posMode & BX_RECT_ALIGN_CY)
+				box.y += (box.h - newH) * 0.5f;
+			else if (theme.posMode & BX_RECT_ALIGN_B)
+				box.y += (box.h - newH);
+			box.h = newH;
+		}
+		else if (aspect > theme.aspect)
+		{
+			float newW = box.w * (theme.aspect / aspect);
+			if (theme.posMode & BX_RECT_ALIGN_CX)
+				box.x += (box.w - newW) * 0.5f;
+			else if (theme.posMode & BX_RECT_ALIGN_R)
+				box.x += (box.w - newW);
+			box.w = newW;
+		}
+	}
+
+	return box;
 }
 
 void bx_initBox(BX_Box* box, BX_Box* parent, BX_Rectf rect, BX_Theme theme)
@@ -83,6 +111,21 @@ void bx_initBox(BX_Box* box, BX_Box* parent, BX_Rectf rect, BX_Theme theme)
 
 	box->child = NULL;
 	box->numChild = 0;
+}
+
+void bx_callDrawType(BX_Box* box, BX_Image image, BX_Rectf parent)
+{
+	switch (box->type)
+	{
+	case BX_TYPE_ROOT:
+	case BX_TYPE_BOX:
+		bx_drawBoxRec(box, image, parent);
+		break;
+
+	case BX_TYPE_LIST:
+		bx_drawListRec(box, image, parent);
+		break;
+	}
 }
 
 BX_Box* bx_createBox(BX_Box* parent, BX_Rectf rect, BX_Theme theme)
@@ -106,6 +149,32 @@ BX_Box* bx_createBox(BX_Box* parent, BX_Rectf rect, BX_Theme theme)
 		}
 	}
 	return box;
+}
+
+BX_List* bx_createList(BX_Box* parent, BX_Rectf rect, BX_Theme theme, u8 order)
+{
+	BX_List* list = malloc(sizeof(BX_List));
+	if (list)
+	{
+		bx_initBox(&list->box, parent, rect, theme);
+		list->box.type = BX_TYPE_LIST;
+		list->order = order;
+		list->scrollX = 0.f;
+		list->scrollY = 0.f;
+
+		BX_Box** temp = realloc(parent->child, (parent->numChild + 1) * sizeof(void*));
+		if (temp)
+		{
+			parent->child = temp;
+			parent->child[parent->numChild++] = list;
+		}
+		else
+		{
+			free(list);
+			list = NULL;
+		}
+	}
+	return list;
 }
 
 
@@ -171,6 +240,10 @@ BX_Rectf bx_cropRect(BX_Rectf rect, BX_Rectf parent)
 		crop.w += parent.w - (crop.x - parent.x + crop.w);
 	if (crop.y - parent.y + crop.h >= parent.h)
 		crop.h += parent.h - (crop.y - parent.y + crop.h);
+	if (crop.w < 0)
+		crop.w = 0;
+	if (crop.h < 0)
+		crop.h = 0;
 
 	return crop;
 }
@@ -178,26 +251,85 @@ BX_Rectf bx_cropRect(BX_Rectf rect, BX_Rectf parent)
 
 void bx_drawBoxRec(BX_Box* box, BX_Image image, BX_Rectf parent)
 {
-	BX_Rectf margin = bx_alignBoxMargin(box->rect, box->theme.margin, 
-		box->theme.posMode, parent);
+	BX_Rectf margin = bx_applyAspectRatio(
+		bx_alignBoxMargin(box->rect, box->theme, parent), box->theme);
 
-	BX_Rectf crop = bx_cropRect(margin, parent);
+	BX_Rectf crop = bx_cropRect(bx_cropRect(margin, parent), 
+		bx_Rectf(0.f, 0.f, image.size.x, image.size.y));
 
-	drawRect(image, bx_Rectu(roundf(crop.x), roundf(crop.y),
-		roundf(crop.w), roundf(crop.h)), box->theme);
+	drawRect(image, bx_Rectu((crop.x), (crop.y),
+		(crop.w), (crop.h)), box->theme);
 	if (box->hovered)
 	{
 		BX_Theme theme = box->theme;
 		theme.bgColor = bx_rgba(0xFF, 0xFF, 0xFF, 0x3F);
-		drawRect(image, bx_Rectu(roundf(crop.x), roundf(crop.y),
-			roundf(crop.w), roundf(crop.h)), theme);
+		drawRect(image, bx_Rectu((crop.x), (crop.y),
+			(crop.w), (crop.h)), theme);
 	}
 
 	if (box->theme.outThick)
 		bx_drawBoxOutline(box, image, parent, margin);
 
 	for (u64 i = 0; i < box->numChild; ++i)
-		bx_drawBoxRec(box->child[i], image, margin);
+		bx_callDrawType(box->child[i], image, margin);
+}
+
+void bx_drawListRec(BX_List* list, BX_Image image, BX_Rectf parent)
+{
+	BX_Rectf margin = bx_applyAspectRatio(
+		bx_alignBoxMargin(list->box.rect, list->box.theme, parent), list->box.theme);
+
+	BX_Rectf crop = bx_cropRect(bx_cropRect(margin, parent),
+		bx_Rectf(0.f, 0.f, image.size.x, image.size.y));
+
+	drawRect(image, bx_Rectu((crop.x), (crop.y),
+		(crop.w), (crop.h)), list->box.theme);
+	if (list->box.hovered)
+	{
+		BX_Theme theme = list->box.theme;
+		theme.bgColor = bx_rgba(0xFF, 0xFF, 0xFF, 0x3F);
+		drawRect(image, bx_Rectu((crop.x), (crop.y),
+			(crop.w), (crop.h)), theme);
+	}
+
+	if (list->box.theme.outThick)
+		bx_drawBoxOutline(list, image, parent, margin);
+
+	float childX = 0.f;
+	float childY = 0.f;
+	float maxChildW = 0.f;
+	float maxChildH = 0.f;
+	for (u64 i = 0; i < list->box.numChild; ++i)
+	{
+		BX_Rectf child = bx_alignBox(list->box.child[i]->rect,
+			list->box.child[i]->theme.posMode, margin);
+
+		// TODO make other options work
+		// Assuming wrapping, fill row first, fill left, fill top
+
+		if (childX + child.w > margin.w)
+		{
+			childY += maxChildH;
+			childX = 0;
+			maxChildW = 0;
+			maxChildH = 0;
+		}
+
+		//BX_Rectf oldRect = list->box.child[i]->rect;
+		//u16 oldPosMode = list->box.child[i]->theme.posMode;
+		list->box.child[i]->rect = bx_Rectf(margin.x + childX, margin.y + childY,
+			child.w, child.h);
+		list->box.child[i]->theme.posMode = 0;
+		bx_callDrawType(list->box.child[i], image, margin);
+		//list->box.child[i]->rect = oldRect;
+		//list->box.child[i]->theme.posMode = oldPosMode;
+
+		if (child.w > maxChildW)
+			maxChildW = child.w;
+		if (child.h > maxChildH)
+			maxChildH = child.h;
+		childX += child.w;
+	}
 }
 
 void bx_drawBoxOutline(BX_Box* box, BX_Image image, BX_Rectf parent, BX_Rectf bounds)
@@ -283,8 +415,7 @@ bool bx_updateBoxRec(BX_Box* box, BX_Rectf parent, BX_Vec2f mouse, bool hasChanc
 {
 	if (hasChance)
 	{
-		BX_Rectf margin = bx_alignBoxMargin(box->rect, box->theme.margin,
-			box->theme.posMode, parent);
+		BX_Rectf margin = bx_alignBoxMargin(box->rect, box->theme, parent);
 
 		BX_Rectf crop = bx_cropRect(margin, parent);
 
@@ -355,6 +486,7 @@ void bx_deleteBox(BX_Box* box)
 			bx_deleteBox(box->child[i]);
 		if (box->child)
 			free(box->child);
+
 		if (box->type == BX_TYPE_ROOT)
 			memset(box, 0, sizeof(BX_Box));
 		else

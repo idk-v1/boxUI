@@ -119,6 +119,7 @@ enum
 {
 	BX_TYPE_ROOT,
 	BX_TYPE_BOX,
+	BX_TYPE_LIST,
 };
 
 typedef struct BX_Theme
@@ -136,32 +137,32 @@ typedef struct BX_Theme
 
 enum
 {
-	BX_RECT_ALIGN_L  =            0b0,
-	BX_RECT_ALIGN_CX =       0b100000,
-	BX_RECT_ALIGN_R  =        0b10000,
-	BX_RECT_ALIGN_T  =            0b0,
-	BX_RECT_ALIGN_CY =     0b10000000,
-	BX_RECT_ALIGN_B  =      0b1000000,
+	BX_RECT_ALIGN_L  =            0b0, // Origin is left side
+	BX_RECT_ALIGN_CX =       0b100000, // Origin is horizontal center
+	BX_RECT_ALIGN_R  =        0b10000, // Origin is right side
+	BX_RECT_ALIGN_T  =            0b0, // Origin is top side
+	BX_RECT_ALIGN_CY =     0b10000000, // Origin is vertical center
+	BX_RECT_ALIGN_B  =      0b1000000, // Origin is bottom side
 
-	BX_RECT_PIX_X    =            0b0,
-	BX_RECT_PIX_Y    =            0b0,
-	BX_RECT_PIX_W    =            0b0,
-	BX_RECT_PIX_H    =            0b0,
+	BX_RECT_PIX_X    =            0b0, // X position uses pixels
+	BX_RECT_PIX_Y    =            0b0, // Y position uses pixels
+	BX_RECT_PIX_W    =            0b0, // Width uses pixels
+	BX_RECT_PIX_H    =            0b0, // Height uses pixels
 
-	BX_RECT_PER_X    =            0b1,
-	BX_RECT_PER_Y    =           0b10,
-	BX_RECT_PER_W    =          0b100,
-	BX_RECT_PER_H    =         0b1000,
+	BX_RECT_PER_X    =            0b1, // X position uses percents
+	BX_RECT_PER_Y    =           0b10, // Y position uses percents
+	BX_RECT_PER_W    =          0b100, // Width uses percents
+	BX_RECT_PER_H    =         0b1000, // Height uses percents
 
-	BX_MARG_PIX_X    =            0b0,
-	BX_MARG_PIX_Y    =            0b0,
-	BX_MARG_PIX_W    =            0b0,
-	BX_MARG_PIX_H    =            0b0,
+	BX_MARG_PIX_L    =            0b0, // Left margin uses pixels
+	BX_MARG_PIX_T    =            0b0, // Top margin uses pixels
+	BX_MARG_PIX_R    =            0b0, // Right margin uses pixels
+	BX_MARG_PIX_B    =            0b0, // Bottom margin uses pixels
 	
-	BX_MARG_PER_X    =    0b100000000,
-	BX_MARG_PER_Y    =   0b1000000000,
-	BX_MARG_PER_W    =  0b10000000000,
-	BX_MARG_PER_H    = 0b100000000000,
+	BX_MARG_PER_L    =    0b100000000, // Left margin uses percents
+	BX_MARG_PER_T    =   0b1000000000, // Top margin uses percents
+	BX_MARG_PER_R    =  0b10000000000, // Right margin uses percents
+	BX_MARG_PER_B    = 0b100000000000, // Bottom margin uses percents
 };
 
 typedef struct BX_Box
@@ -179,6 +180,51 @@ typedef struct BX_Box
 
 } BX_Box;
 
+enum
+{
+	BX_LIST_ROW    =    0b0, // Fill row before column
+	BX_LIST_COL    =    0b1, // Fill column before row
+	BX_LIST_LEFT   =    0b0, // Fill left to right
+	BX_LIST_RIGHT  =   0b10, // FIll right to left
+	BX_LIST_TOP    =    0b0, // Fill top to bottom
+	BX_LIST_BOTTOM =  0b100, // Fill bottom to top
+	BX_LIST_CLIP   =    0b0, // Clip out of bounds, use scrolling
+	BX_LIST_WRAP   = 0b1000, // Place out of bounds on next line, if not able, clip instead
+	/*
+		Using wrap
+		+-----+
+		|# # #|
+		|# #  |
+		+-----+
+
+		Using wrap (full)
+		+-----+
+		|# # #|
+		|# # #|
+		|# # #|
+		+#----+ <- has to clip here
+
+		Using clip
+		+-----+
+		|# # #|# #
+		+-----+
+	*/
+};
+
+// Child positioning and alignment is ignored
+typedef struct BX_List
+{
+	BX_Box box;
+	float scrollX, scrollY;
+	// bit 0 | 0 - fill row first, 1 - fill column first
+	// bit 1 | 0 - fill left first, 1 - fill right first
+	// bit 2 | 0 - fill top first, 1 - fill bottom first
+	// bit 3 | 0 - clip, 1 - wrap
+	u8 order;
+} BX_List;
+
+
+
 typedef struct BX_Image
 {
 	u32* pixels;
@@ -189,6 +235,8 @@ typedef struct BX_Image
 BX_Box bx_createRoot(BX_Rectf rect);
 
 BX_Box* bx_createBox(BX_Box* parent, BX_Rectf rect, BX_Theme theme);
+
+BX_List* bx_createList(BX_Box* parent, BX_Rectf rect, BX_Theme theme, u8 order);
 
 void bx_updateBox(BX_Box* root, BX_Vec2f mouse);
 

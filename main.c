@@ -22,22 +22,19 @@ int main()
 	theme.outColor = bx_rgba(0xFF, 0xFF, 0xFF, 0xFF);
 	theme.posMode = BX_RECT_ALIGN_CX | BX_RECT_ALIGN_CY |
 		BX_RECT_PER_X | BX_RECT_PER_Y | BX_RECT_PER_W | BX_RECT_PER_H |
-		BX_MARG_PER_X | BX_MARG_PER_Y | BX_MARG_PER_W | BX_MARG_PER_H;
+		BX_MARG_PER_L | BX_MARG_PER_T | BX_MARG_PER_R | BX_MARG_PER_B;
 
-	theme.aspect = 1.f;
-	BX_Box* first = bx_createBox(&root, bx_Rectf(50.f, 50.f, 75.f, 75.f), theme);
-	theme.aspect = 0.f;
+	//theme.aspect = 0.f;
+	BX_Box* first = bx_createList(&root, bx_Rectf(50.f, 50.f, 75.f, 75.f), theme, 
+		BX_LIST_CLIP | BX_LIST_ROW | BX_LIST_LEFT | BX_LIST_TOP);
+
+	//theme.aspect = 2.f;
 	theme.outThick = 1;
-	for (int i = 0; i < 4; i++)
+	//theme.margin = bx_Rectf(10.f, 10.f, 10.f, 10.f);
+	for (int i = 0; i < 10; i++)
 	{
-		theme.bgColor = bx_colorLerp(bx_rgba(0x00, 0xFF, 0x00, 0xFF), bx_rgba(0xFF, 0x00, 0x00, 0xFF), i / 3.f);
-		bx_createBox(first, bx_Rectf(i * 20.f + 20.f, 33.f, 20.f, 20.f), theme);
-	}
-	theme.margin = bx_Rectf(10.f, 10.f, 10.f, 10.f);
-	for (int i = 0; i < 4; i++)
-	{
-		theme.bgColor = bx_colorLerp(bx_rgba(0x00, 0xFF, 0x00, 0xFF), bx_rgba(0xFF, 0x00, 0x00, 0xFF), i / 3.f);
-		bx_createBox(first, bx_Rectf(i * 20.f + 20.f, 66.f, 20.f, 20.f), theme);
+		theme.bgColor = bx_colorLerp(bx_rgba(0x00, 0xFF, 0x00, 0xFF), bx_rgba(0xFF, 0x00, 0x00, 0xFF), i / 11.f);
+		bx_createBox(first, bx_Rectf(0.f, 0.f, 20.f + i * 2.f, 20.f + i * 2.f), theme);
 	}
 
 	BX_Vec2f mouse = { 0 };
