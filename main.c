@@ -24,13 +24,13 @@ int main()
 		BX_RECT_PER_X | BX_RECT_PER_Y | BX_RECT_PER_W | BX_RECT_PER_H |
 		BX_MARG_PER_L | BX_MARG_PER_T | BX_MARG_PER_R | BX_MARG_PER_B;
 
-	//theme.aspect = 0.f;
+	theme.aspect = 1.f;
 	BX_Box* first = bx_createList(&root, bx_Rectf(50.f, 50.f, 75.f, 75.f), theme, 
-		BX_LIST_WRAP | BX_LIST_COL | BX_LIST_RIGHT | BX_LIST_TOP);
+		BX_LIST_WRAP | BX_LIST_COL | BX_LIST_RIGHT | BX_LIST_BOTTOM);
 
-	//theme.aspect = 2.f;
+	theme.aspect = 0.f;
 	theme.outThick = 1;
-	//theme.margin = bx_Rectf(10.f, 10.f, 10.f, 10.f);
+	theme.margin = bx_Rectf(5.f, 5.f, 5.f, 5.f);
 	for (int i = 0; i < 10; i++)
 	{
 		theme.bgColor = bx_colorLerp(bx_rgba(0x00, 0xFF, 0x00, 0xFF), bx_rgba(0xFF, 0x00, 0x00, 0xFF), i / 11.f);

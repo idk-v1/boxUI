@@ -489,7 +489,8 @@ bool bx_updateBoxRec(BX_Box* box, BX_Rectf parent, BX_Vec2f mouse, bool hasChanc
 {
 	if (hasChance)
 	{
-		BX_Rectf margin = bx_alignBoxMargin(box->rect, box->theme, parent);
+		BX_Rectf margin = bx_applyAspectRatio(
+			bx_alignBoxMargin(box->rect, box->theme, parent), box->theme);
 
 		BX_Rectf crop = bx_cropRect(margin, parent);
 
