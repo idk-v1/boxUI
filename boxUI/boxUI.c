@@ -296,7 +296,11 @@ void bx_drawListRec(BX_List* list, BX_Image image, BX_Rectf parent)
 		bx_drawBoxOutline(list, image, parent, margin);
 
 	float childX = 0.f;
+	if (list->order & BX_LIST_RIGHT)
+		childX = margin.w;
 	float childY = 0.f;
+	if (list->order & BX_LIST_BOTTOM)
+		childY = margin.h;
 	float maxChildW = 0.f;
 	float maxChildH = 0.f;
 	for (u64 i = 0; i < list->box.numChild; ++i)
@@ -304,15 +308,66 @@ void bx_drawListRec(BX_List* list, BX_Image image, BX_Rectf parent)
 		BX_Rectf child = bx_alignBox(list->box.child[i]->rect,
 			list->box.child[i]->theme.posMode, margin);
 
-		// TODO make other options work
-		// Assuming wrapping, fill row first, fill left, fill top
-
-		if (childX + child.w > margin.w)
+		if (list->order & BX_LIST_WRAP)
 		{
-			childY += maxChildH;
-			childX = 0;
-			maxChildW = 0;
-			maxChildH = 0;
+			if (list->order & BX_LIST_COL)
+			{
+				if (list->order & BX_LIST_BOTTOM)
+				{
+					if (childY - child.h < 0)
+					{
+						if (list->order & BX_LIST_RIGHT)
+							childX -= maxChildW;
+						else // BX_LIST_LEFT
+							childX += maxChildW;
+						childY = margin.h;
+						maxChildW = 0;
+						maxChildH = 0;
+					}
+				}
+				else // BX_LIST_TOP
+				{
+					if (childY + child.h > margin.h)
+					{
+						if (list->order & BX_LIST_RIGHT)
+							childX -= maxChildW;
+						else // BX_LIST_LEFT
+							childX += maxChildW;
+						childY = 0;
+						maxChildW = 0;
+						maxChildH = 0;
+					}
+				}
+			}
+			else // BX_LIST_ROW
+			{
+				if (list->order & BX_LIST_RIGHT)
+				{
+					if (childX - child.w < 0)
+					{
+						if (list->order & BX_LIST_BOTTOM)
+							childY -= maxChildH;
+						else // BX_LIST_TOP
+							childY += maxChildH;
+						childX = margin.w;
+						maxChildW = 0;
+						maxChildH = 0;
+					}
+				}
+				else // BX_LIST_LEFT
+				{
+					if (childX + child.w > margin.w)
+					{
+						if (list->order & BX_LIST_BOTTOM)
+							childY -= maxChildH;
+						else // BX_LIST_TOP
+							childY += maxChildH;
+						childX = 0;
+						maxChildW = 0;
+						maxChildH = 0;
+					}
+				}
+			}
 		}
 
 		//BX_Rectf oldRect = list->box.child[i]->rect;
@@ -320,6 +375,11 @@ void bx_drawListRec(BX_List* list, BX_Image image, BX_Rectf parent)
 		list->box.child[i]->rect = bx_Rectf(margin.x + childX, margin.y + childY,
 			child.w, child.h);
 		list->box.child[i]->theme.posMode = 0;
+		if (list->order & BX_LIST_RIGHT)
+			list->box.child[i]->theme.posMode |= BX_RECT_ALIGN_R;
+		if (list->order & BX_LIST_BOTTOM)
+			list->box.child[i]->theme.posMode |= BX_RECT_ALIGN_B;
+
 		bx_callDrawType(list->box.child[i], image, margin);
 		//list->box.child[i]->rect = oldRect;
 		//list->box.child[i]->theme.posMode = oldPosMode;
@@ -328,7 +388,21 @@ void bx_drawListRec(BX_List* list, BX_Image image, BX_Rectf parent)
 			maxChildW = child.w;
 		if (child.h > maxChildH)
 			maxChildH = child.h;
-		childX += child.w;
+
+		if (list->order & BX_LIST_COL)
+		{
+			if (list->order & BX_LIST_BOTTOM)
+				childY -= child.h;
+			else // BX_LIST_TOP
+				childY += child.h;
+		}
+		else // BX_LIST_ROW
+		{
+			if (list->order & BX_LIST_RIGHT)
+				childX -= child.w;
+			else // BX_LIST_LEFT
+				childX += child.w;
+		}
 	}
 }
 

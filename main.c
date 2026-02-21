@@ -26,7 +26,7 @@ int main()
 
 	//theme.aspect = 0.f;
 	BX_Box* first = bx_createList(&root, bx_Rectf(50.f, 50.f, 75.f, 75.f), theme, 
-		BX_LIST_CLIP | BX_LIST_ROW | BX_LIST_LEFT | BX_LIST_TOP);
+		BX_LIST_WRAP | BX_LIST_COL | BX_LIST_RIGHT | BX_LIST_TOP);
 
 	//theme.aspect = 2.f;
 	theme.outThick = 1;
