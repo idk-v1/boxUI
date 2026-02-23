@@ -167,6 +167,7 @@ enum
 
 typedef struct BX_Box
 {
+	BX_Rectf calc, crop;
 	BX_Rectf rect;
 	
 	BX_Theme theme;
@@ -237,6 +238,8 @@ BX_Box bx_createRoot(BX_Rectf rect);
 BX_Box* bx_createBox(BX_Box* parent, BX_Rectf rect, BX_Theme theme);
 
 BX_List* bx_createList(BX_Box* parent, BX_Rectf rect, BX_Theme theme, u8 order);
+
+void bx_resizeRoot(BX_Box* root, BX_Rectf imageRect);
 
 void bx_updateBox(BX_Box* root, BX_Vec2f mouse);
 

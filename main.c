@@ -37,6 +37,8 @@ int main()
 		bx_createBox(first, bx_Rectf(0.f, 0.f, 20.f + i * 2.f, 20.f + i * 2.f), theme);
 	}
 
+	bx_resizeRoot(&root, bx_Rectf(0.f, 0.f, surface->w, surface->h));
+
 	BX_Vec2f mouse = { 0 };
 
 	bool running = true;
@@ -56,8 +58,7 @@ int main()
 				image.size.x = surface->w;
 				image.size.y = surface->h;
 				image.pixels = surface->pixels;
-				root.rect.w = surface->w;
-				root.rect.h = surface->h;
+				bx_resizeRoot(&root, bx_Rectf(0.f, 0.f, surface->w, surface->h));
 				break;
 			}
 		}
