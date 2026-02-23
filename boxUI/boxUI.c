@@ -399,10 +399,6 @@ BX_Rectf bx_cropRect(BX_Rectf rect, BX_Rectf parent)
 void bx_drawBoxRec(BX_Box* box, BX_Image image)
 {
 	bx_drawRect(image, bx_Rectu(box->crop.x, box->crop.y, box->crop.w, box->crop.h), box->theme.bgColor);
-	if (box->hovered)
-	{
-		bx_drawRect(image, bx_Rectu(box->crop.x, box->crop.y, box->crop.w, box->crop.h), bx_rgba(0xFF, 0xFF, 0xFF, 0x3F));
-	}
 
 	if (box->theme.outThick)
 		bx_drawBoxOutline(box, image);
@@ -496,30 +492,37 @@ void bx_drawBoxOutline(BX_Box* box, BX_Image image)
 	}
 }
 
-bool bx_updateBoxRec(BX_Box* box, BX_Vec2f mouse, bool hasChance)
+BX_Box* bx_updateBoxRec(BX_Box* box, BX_Vec2f mouse, bool hasChance)
 {
 	box->hovered = false;
 	if (hasChance)
 	{
 		bool hovered = bx_rectContains(box->crop, mouse);
+		if (hovered)
+		{
+			BX_Box* ret = NULL;
+			for (u64 i = 0; i < box->numChild; ++i)
+			{
+				BX_Box* child = bx_updateBoxRec(box->child[i], mouse, hovered);
+				if (child)
+					ret = child;
+			}
 
-		bool foundBetter = false;
-		for (u64 i = 0; i < box->numChild; ++i)
-			if (bx_updateBoxRec(box->child[i], mouse, hovered))
-				foundBetter = true;
+			if (!ret)
+			{
+				box->hovered = hovered;
+				ret = box;
+			}
 
-		if (!foundBetter)
-			box->hovered = hovered;
-
-		return hovered;
+			return ret;
+		}
 	}
 	else
 	{
 		for (u64 i = 0; i < box->numChild; ++i)
 			bx_updateBoxRec(box->child[i], mouse, false);
-
-		return false;
 	}
+	return NULL;
 }
 
 bool bx_rectContains(BX_Rectf rect, BX_Vec2f point)
@@ -528,9 +531,9 @@ bool bx_rectContains(BX_Rectf rect, BX_Vec2f point)
 		point.x < rect.x + rect.w && point.y < rect.y + rect.h);
 }
 
-void bx_updateBox(BX_Box* root, BX_Vec2f mouse)
+BX_Box* bx_updateBox(BX_Box* root, BX_Vec2f mouse)
 {
-	bx_updateBoxRec(root, mouse, true);
+	return bx_updateBoxRec(root, mouse, true);
 }
 
 void bx_drawBox(BX_Box* root, BX_Image image)

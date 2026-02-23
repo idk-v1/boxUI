@@ -26,7 +26,7 @@ int main()
 
 	theme.aspect = 1.f;
 	BX_Box* first = bx_createList(&root, bx_Rectf(50.f, 50.f, 75.f, 75.f), theme, 
-		BX_LIST_WRAP | BX_LIST_COL | BX_LIST_RIGHT | BX_LIST_BOTTOM);
+		BX_LIST_WRAP | BX_LIST_ROW | BX_LIST_LEFT | BX_LIST_TOP);
 
 	theme.aspect = 0.f;
 	theme.outThick = 1;
@@ -64,10 +64,14 @@ int main()
 		}
 
 		SDL_GetMouseState(&mouse.x, &mouse.y);
-		bx_updateBox(&root, mouse);
+		BX_Box* hovered = bx_updateBox(&root, mouse);
 
 		memset(image.pixels, 0, surface->w * surface->h * 4);
 		bx_drawBox(&root, image);
+
+		if (hovered)
+			bx_drawRect(image, bx_Rectu(hovered->crop.x, hovered->crop.y, 
+				hovered->crop.w, hovered->crop.h), bx_rgba(0xFF, 0xFF, 0xFF, 0x3F));
 
 		SDL_UpdateWindowSurface(window);
 
