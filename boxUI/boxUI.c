@@ -135,15 +135,8 @@ BX_Box* bx_createBox(BX_Box* parent, BX_Rectf rect, BX_Theme theme)
 		bx_initBox(box, parent, rect, theme);
 		box->type = BX_TYPE_BOX;
 
-		BX_Box** temp = realloc(parent->child, (parent->numChild + 1) * sizeof(void*));
-		if (temp)
+		if (!bx_addTo(parent, box))
 		{
-			parent->child = temp;
-			parent->child[parent->numChild++] = box;
-		}
-		else
-		{
-			printf("realloc failed %d\n", __LINE__);
 			free(box);
 			box = NULL;
 		}
@@ -164,15 +157,8 @@ BX_List* bx_createList(BX_Box* parent, BX_Rectf rect, BX_Theme theme, u8 order)
 		list->scrollX = 0.f;
 		list->scrollY = 0.f;
 
-		BX_Box** temp = realloc(parent->child, (parent->numChild + 1) * sizeof(void*));
-		if (temp)
+		if (!bx_addTo(parent, list))
 		{
-			parent->child = temp;
-			parent->child[parent->numChild++] = list;
-		}
-		else
-		{
-			printf("realloc failed %d\n", __LINE__);
 			free(list);
 			list = NULL;
 		}
@@ -180,6 +166,22 @@ BX_List* bx_createList(BX_Box* parent, BX_Rectf rect, BX_Theme theme, u8 order)
 	else
 		printf("malloc failed %d\n", __LINE__);
 	return list;
+}
+
+bool bx_addTo(BX_Box* parent, BX_Box* box)
+{
+	BX_Box** temp = realloc(parent->child, (parent->numChild + 1) * sizeof(void*));
+	if (temp)
+	{
+		parent->child = temp;
+		parent->child[parent->numChild++] = box;
+		return true;
+	}
+	else
+	{
+		printf("realloc failed %d\n", __LINE__);
+		return false;
+	}
 }
 
 void bx_resizeRoot(BX_Box* root, BX_Rectf imageRect)

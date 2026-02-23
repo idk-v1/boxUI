@@ -176,6 +176,7 @@ typedef struct BX_Box
 	bool hovered;
 
 	u16 numChild;
+	u16 childCap;
 	struct BX_Box* par;
 	struct BX_Box** child;
 
@@ -240,6 +241,8 @@ BX_Box bx_createRoot(BX_Rectf rect);
 BX_Box* bx_createBox(BX_Box* parent, BX_Rectf rect, BX_Theme theme);
 
 BX_List* bx_createList(BX_Box* parent, BX_Rectf rect, BX_Theme theme, u8 order);
+
+bool bx_addTo(BX_Box* parent, BX_Box* box);
 
 void bx_resizeRoot(BX_Box* root, BX_Rectf imageRect);
 void bx_recalcBox(BX_Box* box, BX_Rectf imageRect);
