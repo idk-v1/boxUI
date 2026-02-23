@@ -248,4 +248,5 @@ BX_Box* bx_updateBox(BX_Box* root, BX_Vec2f mouse);
 
 void bx_drawBox(BX_Box* root, BX_Image image);
 
+// You should really call recalc if a list element was deleted
 void bx_deleteBox(BX_Box* box);

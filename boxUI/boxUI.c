@@ -193,7 +193,15 @@ void bx_recalcBox(BX_Box* box, BX_Rectf imageRect)
 			bx_resizeRec(box->child[i], imageRect);
 	}
 	else
-		bx_resizeRec(box, imageRect);
+	{
+		// Lists need to recalc all children after the one that changes, easier to do all
+		// Could be bad for example:
+		// A file viewer showing system32, but something is added/deleted
+		if (box->par && box->par->type == BX_TYPE_LIST)
+			bx_resizeRec(box->par, imageRect);
+		else
+			bx_resizeRec(box, imageRect);
+	}
 }
 
 void bx_resizeRec(BX_Box* box, BX_Rectf imageRect)
@@ -322,7 +330,6 @@ void bx_resizeListRec(BX_List* list, BX_Rectf imageRect)
 		}
 	}
 }
-
 
 
 void bx_drawRect(BX_Image image, BX_Rectu rect, BX_RGBA color)
@@ -548,18 +555,32 @@ void bx_deleteBox(BX_Box* box)
 	{
 		if (box->par)
 		{
-			for (u64 i = 0; i < box->par->numChild; ++i)
+			if (box->par->numChild == 1)
 			{
-				if (box->par->child[i] == box)
+				--box->par->numChild;
+				free(box->par->child);
+				box->par->child = NULL;
+			}
+			else
+			{
+				for (u64 i = 0; i < box->par->numChild; ++i)
 				{
-					box->par->child[i] = box->par->child[box->par->numChild - 1];
-					--box->par->numChild;
-					break;
+					if (box->par->child[i] == box)
+					{
+						memmove(&box->par->child[i], &box->par->child[i + 1],
+							box->par->numChild * sizeof(void*));
+						--box->par->numChild;
+						break;
+					}
 				}
 			}
 		}
 
-		for (u64 i = 0; i < box->numChild; ++i)
+		// Inefficient child trying to delete itself if this.numChild isn't 0
+		u64 numChild = box->numChild;
+		box->numChild = 0;
+
+		for (u64 i = 0; i < numChild; ++i)
 			bx_deleteBox(box->child[i]);
 		if (box->child)
 			free(box->child);
