@@ -24,11 +24,11 @@ int main()
 		BX_RECT_PER_X | BX_RECT_PER_Y | BX_RECT_PER_W | BX_RECT_PER_H |
 		BX_MARG_PER_L | BX_MARG_PER_T | BX_MARG_PER_R | BX_MARG_PER_B;
 
-	theme.aspect = 1.f;
+	//theme.aspect = 1.f;
 	BX_Box* first = bx_createList(&root, bx_Rectf(50.f, 50.f, 75.f, 75.f), theme, 
 		BX_LIST_WRAP | BX_LIST_ROW | BX_LIST_LEFT | BX_LIST_TOP);
 
-	theme.aspect = 0.f;
+	theme.aspect = 1.5f;
 	theme.outThick = 1;
 	theme.margin = bx_Rectf(5.f, 5.f, 5.f, 5.f);
 	for (int i = 0; i < 10; i++)
@@ -40,6 +40,7 @@ int main()
 	bx_recalcBox(&root, bx_Rectf(0.f, 0.f, surface->w, surface->h));
 
 	BX_Vec2f mouse = { 0 };
+	BX_Box* lastHovered = NULL;
 
 	bool running = true;
 	while (running)
@@ -65,6 +66,7 @@ int main()
 
 		SDL_GetMouseState(&mouse.x, &mouse.y);
 		BX_Box* hovered = bx_updateBox(&root, mouse);
+		lastHovered = hovered;
 
 		memset(image.pixels, 0, surface->w * surface->h * 4);
 		bx_drawBox(&root, image);
@@ -75,7 +77,7 @@ int main()
 
 		SDL_UpdateWindowSurface(window);
 
-		//SDL_Delay(10);
+		SDL_Delay(10);
 	}
 
 	SDL_DestroyWindow(window);

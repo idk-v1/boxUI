@@ -44,7 +44,7 @@ BX_Rectf bx_alignBox(BX_Rectf box, u16 posMode, BX_Rectf parent)
 
 BX_Rectf bx_alignBoxMargin(BX_Rectf box, BX_Theme theme, BX_Rectf parent)
 {
-	BX_Rectf rect = bx_alignBox(box, theme.posMode, parent);
+	BX_Rectf rect = bx_applyAspectRatio(bx_alignBox(box, theme.posMode, parent), theme);
 	// Margin uses width and height as right and bottom
 	// Convert from position to size
 
@@ -198,8 +198,7 @@ void bx_recalcBox(BX_Box* box, BX_Rectf imageRect)
 
 void bx_resizeRec(BX_Box* box, BX_Rectf imageRect)
 {
-	box->calc = bx_applyAspectRatio(
-		bx_alignBoxMargin(box->rect, box->theme, box->par->calc), box->theme);
+	box->calc = bx_alignBoxMargin(box->rect, box->theme, box->par->calc);
 
 	box->crop = bx_cropRect(box->calc, box->par->crop);
 
@@ -222,8 +221,9 @@ void bx_resizeListRec(BX_List* list, BX_Rectf imageRect)
 	float maxChildH = 0.f;
 	for (u64 i = 0; i < list->box.numChild; ++i)
 	{
-		BX_Rectf child = bx_alignBox(list->box.child[i]->rect,
-			list->box.child[i]->theme.posMode, list->box.calc);
+		BX_Rectf child = bx_applyAspectRatio(bx_alignBox(list->box.child[i]->rect,
+			list->box.child[i]->theme.posMode, list->box.calc), 
+			list->box.child[i]->theme);
 
 		if (list->order & BX_LIST_WRAP)
 		{
@@ -398,7 +398,8 @@ BX_Rectf bx_cropRect(BX_Rectf rect, BX_Rectf parent)
 
 void bx_drawBoxRec(BX_Box* box, BX_Image image)
 {
-	bx_drawRect(image, bx_Rectu(box->crop.x, box->crop.y, box->crop.w, box->crop.h), box->theme.bgColor);
+	bx_drawRect(image, bx_Rectu(box->crop.x, box->crop.y, 
+		box->crop.w, box->crop.h), box->theme.bgColor);
 
 	if (box->theme.outThick)
 		bx_drawBoxOutline(box, image);
