@@ -5,6 +5,8 @@ BX_Box bx_createRoot(BX_Rectf rect)
 {
 	BX_Box box = { 0 };
 	box.rect = rect;
+	box.calc = rect;
+	box.crop = rect;
 	box.type = BX_TYPE_ROOT;
 	return box;
 }
@@ -180,8 +182,18 @@ void bx_resizeRoot(BX_Box* root, BX_Rectf imageRect)
 	root->calc = imageRect;
 	root->crop = imageRect;
 
-	for (u64 i = 0; i < root->numChild; ++i)
-		bx_resizeRec(root->child[i], imageRect);
+	bx_recalcBox(root, imageRect);
+}
+
+void bx_recalcBox(BX_Box* box, BX_Rectf imageRect)
+{
+	if (box->type == BX_TYPE_ROOT)
+	{
+		for (u64 i = 0; i < box->numChild; ++i)
+			bx_resizeRec(box->child[i], imageRect);
+	}
+	else
+		bx_resizeRec(box, imageRect);
 }
 
 void bx_resizeRec(BX_Box* box, BX_Rectf imageRect)

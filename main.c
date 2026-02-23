@@ -37,7 +37,7 @@ int main()
 		bx_createBox(first, bx_Rectf(0.f, 0.f, 20.f + i * 2.f, 20.f + i * 2.f), theme);
 	}
 
-	bx_resizeRoot(&root, bx_Rectf(0.f, 0.f, surface->w, surface->h));
+	bx_recalcBox(&root, bx_Rectf(0.f, 0.f, surface->w, surface->h));
 
 	BX_Vec2f mouse = { 0 };
 
@@ -71,7 +71,7 @@ int main()
 
 		SDL_UpdateWindowSurface(window);
 
-		SDL_Delay(10);
+		//SDL_Delay(10);
 	}
 
 	SDL_DestroyWindow(window);
