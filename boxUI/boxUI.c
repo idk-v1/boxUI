@@ -113,6 +113,7 @@ void bx_initBox(BX_Box* box, BX_Box* parent, BX_Rectf rect, BX_Theme theme)
 
 	box->child = NULL;
 	box->numChild = 0;
+	box->childCap = 0;
 }
 
 void bx_callDrawType(BX_Box* box, BX_Image image)
@@ -170,18 +171,25 @@ BX_List* bx_createList(BX_Box* parent, BX_Rectf rect, BX_Theme theme, u8 order)
 
 bool bx_addTo(BX_Box* parent, BX_Box* box)
 {
-	BX_Box** temp = realloc(parent->child, (parent->numChild + 1) * sizeof(void*));
-	if (temp)
+	if (parent->numChild + 1 > parent->childCap)
 	{
-		parent->child = temp;
-		parent->child[parent->numChild++] = box;
-		return true;
+		u64 newSize = parent->numChild * 2;
+		if (newSize == 0)
+			newSize = 1;
+		BX_Box** temp = realloc(parent->child, newSize * sizeof(void*));
+		if (temp)
+		{
+			parent->child = temp;
+			parent->childCap = newSize;
+		}
+		else
+		{
+			printf("realloc failed %d\n", __LINE__);
+			return false;
+		}
 	}
-	else
-	{
-		printf("realloc failed %d\n", __LINE__);
-		return false;
-	}
+	parent->child[parent->numChild++] = box;
+	return true;
 }
 
 void bx_resizeRoot(BX_Box* root, BX_Rectf imageRect)
@@ -567,6 +575,7 @@ void bx_deleteBox(BX_Box* box)
 			{
 				--box->par->numChild;
 				free(box->par->child);
+				box->par->childCap = 0;
 				box->par->child = NULL;
 			}
 			else
