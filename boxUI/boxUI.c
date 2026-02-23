@@ -143,10 +143,13 @@ BX_Box* bx_createBox(BX_Box* parent, BX_Rectf rect, BX_Theme theme)
 		}
 		else
 		{
+			printf("realloc failed %d\n", __LINE__);
 			free(box);
 			box = NULL;
 		}
 	}
+	else
+		printf("malloc failed %d\n", __LINE__);
 	return box;
 }
 
@@ -169,10 +172,13 @@ BX_List* bx_createList(BX_Box* parent, BX_Rectf rect, BX_Theme theme, u8 order)
 		}
 		else
 		{
+			printf("realloc failed %d\n", __LINE__);
 			free(list);
 			list = NULL;
 		}
 	}
+	else
+		printf("malloc failed %d\n", __LINE__);
 	return list;
 }
 
@@ -568,7 +574,7 @@ void bx_deleteBox(BX_Box* box)
 					if (box->par->child[i] == box)
 					{
 						memmove(&box->par->child[i], &box->par->child[i + 1],
-							box->par->numChild * sizeof(void*));
+							(box->par->numChild - i - 1) * sizeof(void*));
 						--box->par->numChild;
 						break;
 					}

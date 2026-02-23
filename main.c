@@ -45,6 +45,8 @@ int main()
 	bool running = true;
 	while (running)
 	{
+		bool changed = false;
+		
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
@@ -60,6 +62,7 @@ int main()
 				image.size.y = surface->h;
 				image.pixels = surface->pixels;
 				bx_resizeRoot(&root, bx_Rectf(0.f, 0.f, surface->w, surface->h));
+				changed = true;
 				break;
 
 			case SDL_EVENT_MOUSE_BUTTON_DOWN:
@@ -70,10 +73,14 @@ int main()
 					{
 						bx_deleteBox(hovered);
 						bx_recalcBox(list, bx_Rectf(0.f, 0.f, surface->w, surface->h));
+						changed = true;
 					}
 					break;
 
 				case SDL_BUTTON_RIGHT:
+					theme.posMode = BX_RECT_ALIGN_CX | BX_RECT_ALIGN_CY |
+						BX_RECT_PIX_X | BX_RECT_PIX_Y | BX_RECT_PIX_W | BX_RECT_PIX_H |
+						BX_MARG_PIX_L | BX_MARG_PIX_T | BX_MARG_PIX_R | BX_MARG_PIX_B;
 					theme.aspect = 0.f;
 					theme.bgColor.a = 255;
 					theme.bgColor.r = rand() % 128 + 128;
@@ -83,20 +90,28 @@ int main()
 						bx_Rectf(0.f, 0.f, rand() % 5 * 5.f + 20.f, rand() % 5 * 5.f + 20.f), 
 						theme);
 					bx_recalcBox(list, bx_Rectf(0.f, 0.f, surface->w, surface->h));
+					changed = true;
 					break;
 				}
 			}
 		}
 
 		SDL_GetMouseState(&mouse.x, &mouse.y);
+		BX_Box* lastHovered = hovered;
 		hovered = bx_updateBox(&root, mouse);
 
-		memset(image.pixels, 0, surface->w * surface->h * 4);
-		bx_drawBox(&root, image);
+		if (hovered != lastHovered)
+			changed = true;
 
-		if (hovered)
-			bx_drawRect(image, bx_Rectu(hovered->crop.x, hovered->crop.y, 
-				hovered->crop.w, hovered->crop.h), bx_rgba(0xFF, 0xFF, 0xFF, 0x3F));
+		if (changed)
+		{
+			memset(image.pixels, 0, surface->w * surface->h * 4);
+			bx_drawBox(&root, image);
+
+			if (hovered)
+				bx_drawRect(image, bx_Rectu(hovered->crop.x, hovered->crop.y,
+					hovered->crop.w, hovered->crop.h), bx_rgba(0xFF, 0xFF, 0xFF, 0x3F));
+		}
 
 		SDL_UpdateWindowSurface(window);
 
