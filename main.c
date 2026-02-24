@@ -18,7 +18,7 @@ int main()
 
 	BX_Theme theme = { 0 };
 	theme.fgColor = bx_rgba(0xFF, 0xFF, 0xFF, 0xFF);
-	theme.bgColor = bx_rgba(0xFF, 0x00, 0x00, 0xFF);
+	theme.bgColor = bx_rgba(0x3F, 0x3F, 0x3F, 0xFF);
 	theme.outColor = bx_rgba(0xFF, 0xFF, 0xFF, 0xFF);
 	theme.posMode = BX_RECT_ALIGN_CX | BX_RECT_ALIGN_CY |
 		BX_RECT_PER_X | BX_RECT_PER_Y | BX_RECT_PER_W | BX_RECT_PER_H |
@@ -26,18 +26,16 @@ int main()
 
 	//theme.aspect = 1.f;
 	BX_Box* list = bx_createList(&root, bx_Rectf(50.f, 50.f, 75.f, 75.f), theme, 
-		BX_LIST_WRAP | BX_LIST_ROW | BX_LIST_LEFT | BX_LIST_TOP);
-
-	theme.aspect = 1.5f;
-	theme.outThick = 1;
-	theme.margin = bx_Rectf(2.f, 2.f, 2.f, 2.f);
-	for (int i = 0; i < 5; i++)
-	{
-		theme.bgColor = bx_colorLerp(bx_rgba(0x00, 0xFF, 0x00, 0xFF), bx_rgba(0xFF, 0x00, 0x00, 0xFF), i / 11.f);
-		bx_createBox(list, bx_Rectf(0.f, 0.f, 20.f + i * 2.f, 20.f + i * 2.f), theme);
-	}
+		BX_LIST_WRAP | BX_LIST_ROW | BX_LIST_LEFT | BX_LIST_BOTTOM);
 
 	bx_recalcBox(&root, bx_Rectf(0.f, 0.f, surface->w, surface->h));
+
+	theme.outThick = 1;
+	theme.margin = bx_Rectf(0.f, 0.f, 0.f, 0.f);
+	theme.posMode = BX_RECT_ALIGN_CX | BX_RECT_ALIGN_CY |
+		BX_RECT_PIX_X | BX_RECT_PIX_Y | BX_RECT_PIX_W | BX_RECT_PIX_H |
+		BX_MARG_PIX_L | BX_MARG_PIX_T | BX_MARG_PIX_R | BX_MARG_PIX_B;
+	theme.aspect = 0.f;
 
 	BX_Vec2f mouse = { 0 };
 	BX_Box* hovered = NULL;
@@ -78,17 +76,16 @@ int main()
 					break;
 
 				case SDL_BUTTON_RIGHT:
-					theme.posMode = BX_RECT_ALIGN_CX | BX_RECT_ALIGN_CY |
-						BX_RECT_PIX_X | BX_RECT_PIX_Y | BX_RECT_PIX_W | BX_RECT_PIX_H |
-						BX_MARG_PIX_L | BX_MARG_PIX_T | BX_MARG_PIX_R | BX_MARG_PIX_B;
-					theme.aspect = 0.f;
-					theme.bgColor.a = 255;
-					theme.bgColor.r = rand() % 128 + 128;
-					theme.bgColor.g = rand() % 128 + 128;
-					theme.bgColor.b = rand() % 128 + 128;
-					bx_createBox(list, 
-						bx_Rectf(0.f, 0.f, rand() % 5 * 5.f + 20.f, rand() % 5 * 5.f + 20.f), 
-						theme);
+					for (int i = 0; i < 50; ++i)
+					{
+						theme.bgColor.r = rand() %  64 + 192;
+						int rnd = rand();
+						theme.bgColor.g = rnd % 32 + 64;
+						theme.bgColor.b = rnd % 32 + 64;
+						bx_createBox(list,
+							bx_Rectf(0.f, 0.f, rand() % 5 * 5.f + 20.f, rand() % 1 * 5.f + 20.f),
+							theme);
+					}
 					bx_recalcBox(list, bx_Rectf(0.f, 0.f, surface->w, surface->h));
 					changed = true;
 					break;

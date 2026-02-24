@@ -79,10 +79,10 @@ BX_Rectf bx_applyAspectRatio(BX_Rectf box, BX_Theme theme)
 {
 	if (theme.aspect != 0.f)
 	{
-		float aspect = (float)box.w / (float)box.h;
+		f32 aspect = (f32)box.w / (f32)box.h;
 		if (aspect < theme.aspect)
 		{
-			float newH = box.h * (aspect / theme.aspect);
+			f32 newH = box.h * (aspect / theme.aspect);
 			if (theme.posMode & BX_RECT_ALIGN_CY)
 				box.y += (box.h - newH) * 0.5f;
 			else if (theme.posMode & BX_RECT_ALIGN_B)
@@ -91,7 +91,7 @@ BX_Rectf bx_applyAspectRatio(BX_Rectf box, BX_Theme theme)
 		}
 		else if (aspect > theme.aspect)
 		{
-			float newW = box.w * (theme.aspect / aspect);
+			f32 newW = box.w * (theme.aspect / aspect);
 			if (theme.posMode & BX_RECT_ALIGN_CX)
 				box.x += (box.w - newW) * 0.5f;
 			else if (theme.posMode & BX_RECT_ALIGN_R)
@@ -235,14 +235,14 @@ void bx_resizeRec(BX_Box* box, BX_Rectf imageRect)
 
 void bx_resizeListRec(BX_List* list, BX_Rectf imageRect)
 {
-	float childX = 0.f;
+	f32 childX = 0.f;
 	if (list->order & BX_LIST_RIGHT)
 		childX = list->box.calc.w;
-	float childY = 0.f;
+	f32 childY = 0.f;
 	if (list->order & BX_LIST_BOTTOM)
 		childY = list->box.calc.h;
-	float maxChildW = 0.f;
-	float maxChildH = 0.f;
+	f32 maxChildW = 0.f;
+	f32 maxChildH = 0.f;
 	for (u64 i = 0; i < list->box.numChild; ++i)
 	{
 		BX_Rectf child = bx_applyAspectRatio(bx_alignBox(list->box.child[i]->rect,

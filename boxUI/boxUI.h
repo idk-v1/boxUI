@@ -79,7 +79,7 @@ inline BX_RGBA bx_rgbaHex(u32 color)
 	return ret;
 }
 
-inline float bx_clamp(float min, float val, float max)
+inline f32 bx_clamp(f32 min, f32 val, f32 max)
 {
 	if (val < min)
 		return min;
@@ -88,12 +88,12 @@ inline float bx_clamp(float min, float val, float max)
 	return val;
 }
 
-inline float bx_lerp(float a, float b, float v)
+inline f32 bx_lerp(f32 a, f32 b, f32 v)
 {
 	return (a * v + b * (1.f - v));
 }
 
-inline BX_RGBA bx_colorLerp(BX_RGBA a, BX_RGBA b, float v)
+inline BX_RGBA bx_colorLerp(BX_RGBA a, BX_RGBA b, f32 v)
 {
 	BX_RGBA ret;
 	ret.r = bx_lerp(a.r, b.r, v);
@@ -105,7 +105,7 @@ inline BX_RGBA bx_colorLerp(BX_RGBA a, BX_RGBA b, float v)
 
 inline BX_RGBA bx_blendAlpha(BX_RGBA color, BX_RGBA old)
 {
-	float alpha = color.a / 255.f;
+	f32 alpha = color.a / 255.f;
 	BX_RGBA out;
 	out.a = 255;
 	out.r = alpha * color.r + (1.f - alpha) * old.r;
@@ -127,7 +127,7 @@ typedef struct BX_Theme
 	BX_Rectf margin;
 	BX_RGBA fgColor, bgColor, outColor;
 	i32 outThick; // positive draws inside, negative draws outside, 0 disables
-	float aspect; // width/height | 0 disables, negative is undefined
+	f32 aspect; // width/height | 0 disables, negative is undefined
 	// bits [0-3] x0 y1 w2 h3 |  0 - use pixels, 1 - use percent     | Rect
 	// bits [4,5] x45         | 10 - centered,  00 - left, 01 right  | Rect
 	// bits [6,7] y67         | 10 - centered,  00 - top,  01 bottom | Rect
