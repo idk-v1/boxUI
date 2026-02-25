@@ -427,12 +427,16 @@ BX_Rectf bx_cropRect(BX_Rectf rect, BX_Rectf parent)
 
 void bx_drawBoxRec(BX_Box* box, BX_Image image)
 {
-	bx_drawRect(image, bx_Rectu(box->crop.x, box->crop.y, 
-		box->crop.w, box->crop.h), box->theme.bgColor);
+	if (box->crop.w)
+	{
+		bx_drawRect(image, bx_Rectu(box->crop.x, box->crop.y,
+			box->crop.w, box->crop.h), box->theme.bgColor);
 
-	for (u64 i = 0; i < box->numChild; ++i)
-		bx_callDrawType(box->child[i], image);
-
+		for (u64 i = 0; i < box->numChild; ++i)
+			bx_callDrawType(box->child[i], image);
+	}
+	// Maybe the box is over the edge, but has a huge outline
+	// Still have a chance to draw it
 	if (box->theme.outThick)
 		bx_drawBoxOutline(box, image);
 }
