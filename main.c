@@ -20,6 +20,7 @@ int main()
 	theme.fgColor = bx_rgba(0xFF, 0xFF, 0xFF, 0xFF);
 	theme.bgColor = bx_rgba(0x3F, 0x3F, 0x3F, 0xFF);
 	theme.outColor = bx_rgba(0xFF, 0xFF, 0xFF, 0xFF);
+	theme.outThick = 5;
 	theme.posMode = BX_RECT_ALIGN_CX | BX_RECT_ALIGN_CY |
 		BX_RECT_PER_X | BX_RECT_PER_Y | BX_RECT_PER_W | BX_RECT_PER_H |
 		BX_MARG_PIX_L | BX_MARG_PIX_T | BX_MARG_PIX_R | BX_MARG_PIX_B;
@@ -67,7 +68,6 @@ int main()
 					if (hovered && hovered != list && hovered != &root)
 					{
 						bx_deleteBox(hovered);
-						//bx_recalcBox(list);
 						changed = true;
 					}
 					break;

@@ -189,6 +189,7 @@ bool bx_addTo(BX_Box* parent, BX_Box* box)
 		}
 	}
 	parent->child[parent->numChild++] = box;
+	box->depth = parent->depth + 1;
 
 	bx_recalcBox(box);
 
@@ -429,11 +430,11 @@ void bx_drawBoxRec(BX_Box* box, BX_Image image)
 	bx_drawRect(image, bx_Rectu(box->crop.x, box->crop.y, 
 		box->crop.w, box->crop.h), box->theme.bgColor);
 
-	if (box->theme.outThick)
-		bx_drawBoxOutline(box, image);
-
 	for (u64 i = 0; i < box->numChild; ++i)
 		bx_callDrawType(box->child[i], image);
+
+	if (box->theme.outThick)
+		bx_drawBoxOutline(box, image);
 }
 
 void bx_drawBoxOutline(BX_Box* box, BX_Image image)

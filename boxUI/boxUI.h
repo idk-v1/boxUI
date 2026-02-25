@@ -175,6 +175,8 @@ typedef struct BX_Box
 	u8 type;
 	bool hovered;
 
+	u16 depth;
+
 	u16 numChild;
 	u16 childCap;
 	struct BX_Box* par;
