@@ -21,6 +21,6 @@ BX_Box* bx_updateBoxRec(BX_Box* box, BX_Vec2f mouse, bool hasChance);
 
 bool bx_rectContains(BX_Rectf rect, BX_Vec2f point);
 
-void bx_resizeRec(BX_Box* box, BX_Rectf imageRect);
+void bx_resizeRec(BX_Box* box);
 
-void bx_resizeListRec(BX_List* list, BX_Rectf imageRect);
+void bx_resizeListRec(BX_List* list);

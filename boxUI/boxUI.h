@@ -245,7 +245,7 @@ BX_List* bx_createList(BX_Box* parent, BX_Rectf rect, BX_Theme theme, u8 order);
 bool bx_addTo(BX_Box* parent, BX_Box* box);
 
 void bx_resizeRoot(BX_Box* root, BX_Rectf imageRect);
-void bx_recalcBox(BX_Box* box, BX_Rectf imageRect);
+void bx_recalcBox(BX_Box* box);
 
 BX_Box* bx_updateBox(BX_Box* root, BX_Vec2f mouse);
 

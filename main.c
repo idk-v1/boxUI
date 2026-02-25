@@ -28,7 +28,7 @@ int main()
 	BX_Box* list = bx_createList(&root, bx_Rectf(50.f, 50.f, 75.f, 75.f), theme, 
 		BX_LIST_WRAP | BX_LIST_ROW | BX_LIST_LEFT | BX_LIST_BOTTOM);
 
-	bx_recalcBox(&root, bx_Rectf(0.f, 0.f, surface->w, surface->h));
+	bx_recalcBox(&root);
 
 	theme.outThick = 1;
 	theme.margin = bx_Rectf(0.f, 0.f, 0.f, 0.f);
@@ -70,7 +70,7 @@ int main()
 					if (hovered && hovered != list && hovered != &root)
 					{
 						bx_deleteBox(hovered);
-						bx_recalcBox(list, bx_Rectf(0.f, 0.f, surface->w, surface->h));
+						bx_recalcBox(list);
 						changed = true;
 					}
 					break;
@@ -86,7 +86,7 @@ int main()
 							bx_Rectf(0.f, 0.f, rand() % 5 * 5.f + 20.f, rand() % 1 * 5.f + 20.f),
 							theme);
 					}
-					bx_recalcBox(list, bx_Rectf(0.f, 0.f, surface->w, surface->h));
+					bx_recalcBox(list);
 					changed = true;
 					break;
 				}

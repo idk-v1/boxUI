@@ -198,15 +198,15 @@ void bx_resizeRoot(BX_Box* root, BX_Rectf imageRect)
 	root->calc = imageRect;
 	root->crop = imageRect;
 
-	bx_recalcBox(root, imageRect);
+	bx_recalcBox(root);
 }
 
-void bx_recalcBox(BX_Box* box, BX_Rectf imageRect)
+void bx_recalcBox(BX_Box* box)
 {
 	if (box->type == BX_TYPE_ROOT)
 	{
 		for (u64 i = 0; i < box->numChild; ++i)
-			bx_resizeRec(box->child[i], imageRect);
+			bx_resizeRec(box->child[i]);
 	}
 	else
 	{
@@ -214,26 +214,26 @@ void bx_recalcBox(BX_Box* box, BX_Rectf imageRect)
 		// Could be bad for example:
 		// A file viewer showing system32, but something is added/deleted
 		if (box->par && box->par->type == BX_TYPE_LIST)
-			bx_resizeRec(box->par, imageRect);
+			bx_resizeRec(box->par);
 		else
-			bx_resizeRec(box, imageRect);
+			bx_resizeRec(box);
 	}
 }
 
-void bx_resizeRec(BX_Box* box, BX_Rectf imageRect)
+void bx_resizeRec(BX_Box* box)
 {
 	box->calc = bx_alignBoxMargin(box->rect, box->theme, box->par->calc);
 
 	box->crop = bx_cropRect(box->calc, box->par->crop);
 
 	if (box->type == BX_TYPE_LIST)
-		bx_resizeListRec(box, imageRect);
+		bx_resizeListRec(box);
 	else
 		for (u64 i = 0; i < box->numChild; ++i)
-			bx_resizeRec(box->child[i], imageRect);
+			bx_resizeRec(box->child[i]);
 }
 
-void bx_resizeListRec(BX_List* list, BX_Rectf imageRect)
+void bx_resizeListRec(BX_List* list)
 {
 	f32 childX = 0.f;
 	if (list->order & BX_LIST_RIGHT)
@@ -321,7 +321,7 @@ void bx_resizeListRec(BX_List* list, BX_Rectf imageRect)
 		if (list->order & BX_LIST_BOTTOM)
 			list->box.child[i]->theme.posMode |= BX_RECT_ALIGN_B;
 
-		bx_resizeRec(list->box.child[i], imageRect);
+		bx_resizeRec(list->box.child[i]);
 		list->box.child[i]->rect = oldRect;
 		list->box.child[i]->theme.posMode = oldPosMode;
 
