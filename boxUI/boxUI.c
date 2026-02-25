@@ -189,6 +189,9 @@ bool bx_addTo(BX_Box* parent, BX_Box* box)
 		}
 	}
 	parent->child[parent->numChild++] = box;
+
+	bx_recalcBox(box);
+
 	return true;
 }
 
@@ -210,7 +213,9 @@ void bx_recalcBox(BX_Box* box)
 	}
 	else
 	{
-		// Lists need to recalc all children after the one that changes, easier to do all
+		// Lists need to recalc all children after the one that changes
+		// Wouldn't know how big the biggest child of the row/col is
+		// Easier to do all
 		// Could be bad for example:
 		// A file viewer showing system32, but something is added/deleted
 		if (box->par && box->par->type == BX_TYPE_LIST)

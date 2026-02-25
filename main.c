@@ -24,11 +24,8 @@ int main()
 		BX_RECT_PER_X | BX_RECT_PER_Y | BX_RECT_PER_W | BX_RECT_PER_H |
 		BX_MARG_PIX_L | BX_MARG_PIX_T | BX_MARG_PIX_R | BX_MARG_PIX_B;
 
-	//theme.aspect = 1.f;
 	BX_Box* list = bx_createList(&root, bx_Rectf(50.f, 50.f, 75.f, 75.f), theme, 
 		BX_LIST_WRAP | BX_LIST_ROW | BX_LIST_LEFT | BX_LIST_BOTTOM);
-
-	bx_recalcBox(&root);
 
 	theme.outThick = 1;
 	theme.margin = bx_Rectf(0.f, 0.f, 0.f, 0.f);
@@ -86,7 +83,6 @@ int main()
 							bx_Rectf(0.f, 0.f, rand() % 5 * 5.f + 20.f, rand() % 1 * 5.f + 20.f),
 							theme);
 					}
-					bx_recalcBox(list);
 					changed = true;
 					break;
 				}
