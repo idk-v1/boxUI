@@ -67,7 +67,7 @@ int main()
 					if (hovered && hovered != list && hovered != &root)
 					{
 						bx_deleteBox(hovered);
-						bx_recalcBox(list);
+						//bx_recalcBox(list);
 						changed = true;
 					}
 					break;

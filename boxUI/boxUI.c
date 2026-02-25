@@ -576,7 +576,8 @@ void bx_deleteBox(BX_Box* box)
 	{
 		if (box->par)
 		{
-			if (box->par->numChild == 1)
+			if (box->par->numChild == 0);
+			else if (box->par->numChild == 1)
 			{
 				--box->par->numChild;
 				free(box->par->child);
@@ -595,6 +596,8 @@ void bx_deleteBox(BX_Box* box)
 						break;
 					}
 				}
+				if (box->par->type == BX_TYPE_LIST)
+					bx_resizeListRec(box->par);
 			}
 		}
 
