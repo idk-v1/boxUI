@@ -125,6 +125,10 @@ void bx_callDrawType(BX_Box* box, BX_Image image)
 	case BX_TYPE_LIST:
 		bx_drawBoxRec(box, image);
 		break;
+
+	case BX_TYPE_TEXT:
+		bx_drawTextRec(box, image);
+		break;
 	}
 }
 
@@ -167,6 +171,36 @@ BX_List* bx_createList(BX_Box* parent, BX_Rectf rect, BX_Theme theme, u8 order)
 	else
 		printf("malloc failed %d\n", __LINE__);
 	return list;
+}
+
+BX_Text* bx_createText(BX_Box* parent, BX_Vec2f pos, const char* string, bool copy, BX_Theme theme, u16 fontSize, u8 order)
+{
+	BX_Text* text = malloc(sizeof(BX_Text));
+	if (text)
+	{
+		bx_initBox(&text->box, parent, bx_Rectf(pos.x, pos.y, 0.f, 0.f), theme);
+		text->box.type = BX_TYPE_TEXT;
+		text->order = order;
+		text->scrollX = 0.f;
+		text->scrollY = 0.f;
+		text->fontSize = fontSize;
+		text->copy = copy;
+		text->text = NULL;
+		text->length = 0;
+
+		bx_setText(text, string, copy);
+
+		if (!bx_addTo(parent, text))
+		{
+			if (text->text && text->copy)
+				free(text->text);
+			free(text);
+			text = NULL;
+		}
+	}
+	else
+		printf("malloc failed %d\n", __LINE__);
+	return text;
 }
 
 bool bx_addTo(BX_Box* parent, BX_Box* box)
@@ -226,10 +260,96 @@ void bx_recalcBox(BX_Box* box)
 	}
 }
 
+bool bx_setText(BX_Text* text, const char* string, bool copy)
+{
+	if (text->text && text->copy)
+		free(text->text);
+	text->copy = copy;
+
+	if (!string)
+	{
+		text->length = 0;
+		text->text = NULL;
+		text->box.rect.w = 0;
+		text->box.rect.h = 0;
+		return true;
+	}
+	else
+	{
+		text->length = strlen(string);
+		if (copy)
+		{
+			text->text = malloc(text->length + 1);
+			if (text->text)
+			{
+				memcpy(text->text, string, text->length + 1);
+				BX_Vec2f size = bx_measureText(string, text->box.par->calc, text->fontSize, text->order);
+				text->box.rect.w = size.x;
+				text->box.rect.h = size.y;
+				return true;
+			}
+			else
+			{
+				text->length = 0;
+				return false;
+			}
+		}
+		else
+		{
+			text->text = string;
+			BX_Vec2f size = bx_measureText(string, text->box.par->calc, text->fontSize, text->order);
+			text->box.rect.w = size.x;
+			text->box.rect.h = size.y;
+			return true;
+		}
+	}
+}
+
+BX_Vec2f bx_measureText(const char* string, BX_Rectf parent, u16 fontSize, u8 order)
+{
+	f32 fontW = fontSize * 8.f;
+	f32 fontH = fontSize * 10.f;
+	f32 tx = 0.f, ty = 0.f;
+
+	if (!string)
+	{
+		return bx_Vec2f(0, 0);
+	}
+
+	u64 length = strlen(string);
+	for (u64 i = 0; i < length; ++i)
+	{
+		if (string[i] == '\n')
+		{
+			ty += fontH;
+			tx = 0;
+		}
+		else
+		{
+			if (tx + fontW >= parent.w)
+			{
+				ty += fontH;
+				tx = 0;
+			}
+			tx += fontW;
+		}
+	}
+
+	return bx_Vec2f(tx, ty + fontH);
+}
+
 void bx_resizeRec(BX_Box* box)
 {
-	box->calc = bx_alignBoxMargin(box->rect, box->theme, box->par->calc);
+	if (box->type == BX_TYPE_TEXT)
+	{
+		BX_Text* text = box;
+		BX_Vec2f size = bx_measureText(text->text, box->par->calc, text->fontSize, text->order);
+		box->rect.w = size.x;
+		box->rect.h = size.y;
+	}
 
+	box->calc = bx_alignBoxMargin(box->rect, box->theme, box->par->calc);
+	
 	box->crop = bx_cropRect(box->calc, box->par->crop);
 
 	if (box->type == BX_TYPE_LIST)
@@ -526,6 +646,50 @@ void bx_drawBoxOutline(BX_Box* box, BX_Image image)
 	}
 }
 
+void bx_drawTextRec(BX_Text* text, BX_Image image)
+{
+	if (text->box.crop.w)
+	{
+		bx_drawRect(image, bx_Rectu(text->box.crop.x, text->box.crop.y,
+			text->box.crop.w, text->box.crop.h), text->box.theme.bgColor);
+
+		f32 fontW = text->fontSize * 8.f;
+		f32 fontH = text->fontSize * 10.f;
+		f32 tx = text->box.calc.x, ty = text->box.calc.y;
+		for (u64 i = 0; i < text->length; ++i)
+		{
+			if (text->text[i] == '\n')
+			{
+				ty += fontH;
+				tx = text->box.calc.x;
+			}
+			else
+			{
+				if (tx + fontW >= text->box.par->calc.w)
+				{
+					ty += fontH;
+					tx = text->box.calc.x;
+				}
+
+				BX_Rectf rect = bx_cropRect(bx_cropRect(bx_Rectf(tx, ty, fontW, fontH),
+					text->box.calc), bx_Rectf(0, 0, image.size.x, image.size.y));
+				bx_drawRect(image, bx_Rectu(rect.x, rect.y, rect.w, rect.h), 
+					(i & 1 ? text->box.theme.fgColor : text->box.theme.bgColor));
+
+				tx += fontW;
+			}
+		}
+	}
+
+	for (u64 i = 0; i < text->box.numChild; ++i)
+		bx_callDrawType(text->box.child[i], image);
+
+	// Maybe the box is over the edge, but has a huge outline
+	// Still have a chance to draw it
+	if (text->box.theme.outThick)
+		bx_drawBoxOutline(&text->box, image);
+}
+
 BX_Box* bx_updateBoxRec(BX_Box* box, BX_Vec2f mouse, bool hasChance)
 {
 	box->hovered = false;
@@ -618,6 +782,16 @@ void bx_deleteBox(BX_Box* box)
 		if (box->type == BX_TYPE_ROOT)
 			memset(box, 0, sizeof(BX_Box));
 		else
+		{
+			if (box->type == BX_TYPE_TEXT)
+			{
+				BX_Text* text = box;
+				if (text->copy)
+					if (text->text)
+						free(text->text);
+			}
+
 			free(box);
+		}
 	}
 }

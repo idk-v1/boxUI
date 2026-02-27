@@ -35,6 +35,8 @@ int main()
 		BX_MARG_PIX_L | BX_MARG_PIX_T | BX_MARG_PIX_R | BX_MARG_PIX_B;
 	theme.aspect = 0.f;
 
+	BX_Text* text = bx_createText(&root, bx_Vec2f(100.f, 100.f), "test", false, theme, 8, 0);
+
 	BX_Vec2f mouse = { 0 };
 	BX_Box* hovered = NULL;
 
@@ -65,7 +67,7 @@ int main()
 				switch (event.button.button)
 				{
 				case SDL_BUTTON_LEFT:
-					if (hovered && hovered != list && hovered != &root)
+					if (hovered && hovered != list && hovered != &root && hovered != text)
 					{
 						bx_deleteBox(hovered);
 						changed = true;

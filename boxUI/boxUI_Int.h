@@ -17,6 +17,8 @@ void bx_drawBoxRec(BX_Box* box, BX_Image image);
 
 void bx_drawBoxOutline(BX_Box* box, BX_Image image);
 
+void bx_drawTextRec(BX_Text* text, BX_Image image);
+
 BX_Box* bx_updateBoxRec(BX_Box* box, BX_Vec2f mouse, bool hasChance);
 
 bool bx_rectContains(BX_Rectf rect, BX_Vec2f point);

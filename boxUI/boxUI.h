@@ -120,6 +120,8 @@ enum
 	BX_TYPE_ROOT,
 	BX_TYPE_BOX,
 	BX_TYPE_LIST,
+
+	BX_TYPE_TEXT,
 };
 
 typedef struct BX_Theme
@@ -227,6 +229,22 @@ typedef struct BX_List
 	u8 order;
 } BX_List;
 
+// Text is an optimized list of characters
+typedef struct BX_Text
+{
+	BX_Box box;
+	float scrollX, scrollY;
+	char* text;
+	u16 length;
+	u16 fontSize;
+	bool copy;
+	// bit 0 | 0 - fill row first, 1 - fill column first
+	// bit 1 | 0 - fill left first, 1 - fill right first
+	// bit 2 | 0 - fill top first, 1 - fill bottom first
+	// bit 3 | 0 - clip, 1 - wrap
+	u8 order;
+} BX_Text;
+
 
 
 typedef struct BX_Image
@@ -244,10 +262,16 @@ BX_Box* bx_createBox(BX_Box* parent, BX_Rectf rect, BX_Theme theme);
 
 BX_List* bx_createList(BX_Box* parent, BX_Rectf rect, BX_Theme theme, u8 order);
 
+BX_Text* bx_createText(BX_Box* parent, BX_Vec2f pos, const char* string, bool copy, BX_Theme theme, u16 fontSize, u8 order);
+
+
 bool bx_addTo(BX_Box* parent, BX_Box* box);
 
 void bx_resizeRoot(BX_Box* root, BX_Rectf imageRect);
 void bx_recalcBox(BX_Box* box);
+
+bool bx_setText(BX_Text* text, const char* string, bool copy);
+BX_Vec2f bx_measureText(const char* string, BX_Rectf parent, u16 fontSize, u8 order);
 
 BX_Box* bx_updateBox(BX_Box* root, BX_Vec2f mouse);
 
